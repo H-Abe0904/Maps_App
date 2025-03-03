@@ -1,6 +1,7 @@
 "use client";
 
-import useMap from "..//hooks/useMap";
+import { useEffect, useRef, useState } from "react";
+import useMap from "../hooks/useMap";
 import useMapMarkers from "../hooks/useMarker";
 
 const locations = [
@@ -9,13 +10,20 @@ const locations = [
 ];
 
 export default function LocationPage() {
-  const map = useMap("map", [139.767125, 35.681236], 12);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const [mapContainer, setMapContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setMapContainer(mapContainerRef.current);
+  }, []);
+
+  const map = useMap(mapContainer, [139.767125, 35.681236], 12);
   useMapMarkers(map, locations);
 
   return (
     <div>
       <h1>位置情報一覧</h1>
-      <div id="map" style={{ width: "100%", height: "500px" }} />
+      <div ref={mapContainerRef} id="map" style={{ width: "100%", height: "500px" }} />
     </div>
   );
 }
