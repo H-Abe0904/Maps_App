@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react";
-import maplibregl from "maplibre-gl";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const useMap = (containerId: string | HTMLElement | null, center: [number, number], zoom: number) => {
-  const [map, setMap] = useState<maplibregl.Map | null>(null);
+export function useMap() {
+  const [map, setMap] = useState<L.Map | null>(null);
 
   useEffect(() => {
-    if (!containerId) return; // コンテナが設定されていない場合はスキップ
+    if (map) return; // 既にマップがある場合は再生成しない
 
-    const mapInstance = new maplibregl.Map({
-      container: containerId, // 変更: `map` ではなく `containerId` を使用
-      style: "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
-      center: center, // `center` を引数から受け取る
-      zoom: zoom, // `zoom` を引数から受け取る
-    });
+    // Map の初期化
+    const mapInstance = L.map("map").setView([35.681236, 139.767125], 12);
 
-    mapInstance.on("load", () => {
-      console.log("🌍 地図が読み込まれました");
-    });
+    // OpenStreetMap のタイルレイヤーを追加
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(mapInstance);
+
+    // 東京駅にピンを立てる
+    L.marker([35.681236, 139.767125])
+      .addTo(mapInstance)
+      .bindPopup("東京駅")
+      .openPopup();
 
     setMap(mapInstance);
 
     return () => {
       mapInstance.remove();
     };
-  }, [containerId]);
+  }, []);
 
-  return map;
-};
-
-export default useMap;
+  return { map };
+}
