@@ -1,28 +1,39 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-interface MapViewProps {
-  lat: number;
-  lng: number;
-}
-
-export default function MapView({ lat, lng }: MapViewProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
+export default function MapView() {
+  const [map, setMap] = useState<L.Map | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (typeof window === "undefined") return;
 
-    const map = new google.maps.Map(mapRef.current, {
-      center: { lat, lng },
-      zoom: 15,
-    });
+    const mapInstance = L.map("map").setView([35.681236, 139.767125], 15);
 
-    new google.maps.marker.AdvancedMarkerElement({
-      position: { lat, lng },
-      map,
-    });
-  }, [lat, lng]);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(mapInstance);
 
-  return <div ref={mapRef} style={{ width: '100%', height: '400px' }} />;
+    L.marker([35.681236, 139.767125], {
+      icon: L.icon({
+        iconUrl: "/marker-icon.png",
+        shadowUrl: "/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+      }),
+    })
+      .addTo(mapInstance)
+      .bindPopup("東京駅")
+      .openPopup();
+
+    setMap(mapInstance);
+
+    return () => {
+      mapInstance.remove();
+    };
+  }, []);
+
+  return <div id="map" style={{ width: "100%", height: "500px" }} />;
 }
