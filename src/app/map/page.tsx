@@ -11,7 +11,7 @@ export default function LocationPage() {
   return (
     <div>
       <h1>東京駅のマップ</h1>
-      <MapView />
+      <MapComponent/>
     </div>
   );
 }
